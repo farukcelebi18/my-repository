@@ -2,14 +2,24 @@
 from flask import Flask, render_template, request
 from flaskext.mysql import MySQL
 import boto3
+
 # Create an object named app
 app = Flask(__name__)
 
+# Get DB parameters from parameter store
+ssm = boto3.client('ssm')
+response = ssm.get_parameter(Name="/clarusway/dbname")
+db_name = response['Parameter']['Value']
+
+response = ssm.get_parameter(Name="/clarusway/password")
+password = response['Parameter']['Value']
+
+
 # Configure mysql database
-app.config['MYSQL_DATABASE_HOST'] = 'applicationrds.cfmvalpumded.us-east-1.rds.amazonaws.com'
+app.config['MYSQL_DATABASE_HOST'] = 'applicationrds.cbanmzptkrzf.us-east-1.rds.amazonaws.com'
 app.config['MYSQL_DATABASE_USER'] = 'admin'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'Clarusway_1'
-app.config['MYSQL_DATABASE_DB'] = 'clarusway'
+app.config['MYSQL_DATABASE_PASSWORD'] = password
+app.config['MYSQL_DATABASE_DB'] = db_name
 app.config['MYSQL_DATABASE_PORT'] = 3306
 mysql = MySQL()
 mysql.init_app(app)
@@ -29,7 +39,7 @@ CREATE TABLE users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 """
 data = """
-INSERT INTO clarusway.users 
+INSERT INTO users 
 VALUES 
 	("Tuba", "tuba@amazon.com" ),
 	("Ethan", "ethan@micrasoft.com"),
@@ -107,5 +117,5 @@ def add_email():
 
 # Add a statement to run the Flask application which can be reached from any host on port 80.
 if __name__ == '__main__':
-   app.run(debug=True, port=5000)
+   app.run(debug=True)
    # app.run(host='0.0.0.0', port=80)

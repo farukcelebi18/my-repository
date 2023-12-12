@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: |
+Template to build a static s3 website, CloudFront and R53 records
+
+Parameters:
+
+pKittensDomainName:
+Description: Full domain name for kittens website
+Type: String
+Default: kittens.omercelebi.net
+
+Resources:
+
+rKittensBucket:
+Type: AWS::S3::Bucket
+Properties:
+BucketName: !Ref pKittensDomainName
+PublicAccessBlockConfiguration:
+BlockPublicAcls: false
+BlockPublicPolicy: false
+IgnorePublicAcls: false
+RestrictPublicBuckets: false
+WebsiteConfiguration:
+IndexDocument: index.html
+BucketEncryption:
+ServerSideEncryptionConfiguration:
+- BucketKeyEnabled: true
+ServerSideEncryptionByDefault: 
+    SSEAlgorithm: AES256
+rKittensBucketPolicy:
+Type: AWS::S3::BucketPolicy
+Properties:
+Bucket: !Ref rKittensBucket
+PolicyDocument:
+Id: PublicReadPolicy
+Version: 2012-10-17
+Statement:
+- Sid: PublicReadForGetBucketObjects
+Effect: Allow
+Principal: '*'
+Action: 's3:GetObject'
+Resource: !Join [ '', [ !GetAtt rKittensBucket.Arn, '/*' ] ]
+
+
+
+
+#Outputs:
